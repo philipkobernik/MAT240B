@@ -10,6 +10,8 @@ const float SAMPLE_RATE = 44100;
 struct Array : std::vector<float> {
   void operator()(float f) { push_back(f); }
 
+  // expects [0, size)
+  // XXX question: why can the compiler make this faster given 'const'
   float raw(const float index) const {
     const unsigned i = floor(index);
     const float x0 = at(i);
@@ -24,12 +26,15 @@ struct Array : std::vector<float> {
   // allow for sloppy indexing (e.g., negative, huge) by fixing the index to
   // within the bounds of the array
   float get(float index) const {
+    // XXX question: why not use fmod??
     if (index < 0) index += size();
     if (index > size()) index -= size();
     return raw(index);  // defer to our method without bounds checking
   }
   float operator[](const float index) const { return get(index); }
-  float phasor(float index) const { return get(size() * index); }
+
+  // expects (0, 1)
+  float phasor(const float index) const { return get(size() * index); }
 };
 
 struct TableSine : Array {
@@ -41,6 +46,7 @@ struct TableSine : Array {
 
 // expects (0, 1)
 float sine(float t) {
+  // XXX TableSine is intialized the first time sine is called
   static TableSine tableSine;
   return tableSine.phasor(t);
 }
@@ -115,6 +121,10 @@ struct Line {
   }
 };
 
+// struct Envelope {
+//   vector<Line> line;
+// };
+
 struct ADSR {
   Line attack, decay, release;
   int state = 0;
@@ -136,6 +146,8 @@ struct ADSR {
     state = 3;
   }
 
+  ////////////////////////////////////////////////////
+
   float operator()() {
     switch (state) {
       default:
@@ -147,10 +159,14 @@ struct ADSR {
         state = 2;
       case 2:  // sustaining...
         return decay.target;
+        // aka "sustain" value
       case 3:
         return release();
     }
   }
+
+  ///////////////////////////////////////////////////////////////
+
   void print() {
     printf("  state:%d\n", state);
     printf("  attack:%f\n", attack.seconds);

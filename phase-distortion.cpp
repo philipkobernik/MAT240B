@@ -7,6 +7,7 @@ using namespace al;
 #include "synths.h"
 using namespace diy;
 
+// a: (0, 1)
 float pdhalf(float phase, float a) {  //
   float t = (1 - a) / 2;
   if (t <= 0) return 0;
@@ -46,7 +47,7 @@ struct MyApp : App {
   bool onKeyDown(const Keyboard& k) override {
     if (k.key() >= '1' && k.key() <= '9') {
       int i = k.key() - '1';
-      float value = norm(i, 0, 9);
+      float value = norm(i, 0, 8);
       std::cout << value << std::endl;
       phase_distortion.set(value);
     }
