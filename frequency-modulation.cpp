@@ -14,15 +14,6 @@ struct MyApp : App {
     //
   }
 
-  void onAnimate(double dt) override {
-    //
-  }
-
-  void onDraw(Graphics& g) override {
-    g.clear(0.25);
-    //
-  }
-
   void onSound(AudioIOData& io) override {
     while (io()) {
       io.out(0) = io.out(1) = line() * cycle();
