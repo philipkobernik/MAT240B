@@ -1,4 +1,4 @@
-.SUFFIXES:
+.SUFFIXES: # throw away traditional assumptions
 
 # maybe do different stuff based on what system we have...
 UNAME_S := $(shell uname -s)
@@ -18,6 +18,7 @@ CXX += -Wall
 CXX += -Wextra
 CXX += -Wno-unused-parameter
 
+INC=
 INC += -I ./
 
 HDR=

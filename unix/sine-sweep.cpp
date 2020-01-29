@@ -7,6 +7,7 @@ int main(int argc, char* argv[]) {
     float frequency = mtof(note);
     say(sin(phase) * 0.707f);
     phase += 2 * pi * frequency / SAMPLE_RATE;
-    if (phase > 2 * pi) phase -= 2 * pi;
+    if (phase > 2 * pi)  //
+      phase -= 2 * pi;
   }
 }
