@@ -5,6 +5,7 @@
 using namespace std;
 int main() {
   unordered_map<string, unsigned> dictionary;
+  // type of an "entry" pair<string, unsigned>
 
   string word;
   while (cin >> word) {
@@ -13,6 +14,7 @@ int main() {
       dictionary[word] = 1;
     } else {
       dictionary[word] += 1;
+      // search->second += 1;
     }
 
     /*
