@@ -1,26 +1,24 @@
 #include "Gamma/DFT.h"  // gam::STFT
+#include "Gamma/Filter.h"
 #include "Gamma/Oscillator.h"
 #include "Gamma/SamplePlayer.h"
 #include "al/app/al_App.hpp"
+#include "al/ui/al_ControlGUI.hpp"  // gui.draw(g)
 using namespace al;
 
 #include <limits>
 
 #include "functions.h"
 
-gam::STFT stft(4096, 4096 / 4, 16384, gam::HAMMING);  //, gam::MAG_FREQ, 3);
+gam::STFT stft(4096, 4096 / 4, 16384, gam::HAMMING);
 gam::SamplePlayer<float, gam::ipl::Cubic, gam::phsInc::Loop> player;
-
-// unsigned winSize
-// unsigned hopSize
-// unsigned padSize
-// WindowType winType,
-// SpectralType specType
-// unsigned numAuxA???
 
 struct MyApp : App {
   float hz;
   gam::Sine<> osc;
+  gam::OnePole<> frequencyFilter, rateFilter;
+  Parameter rate{"/rate", "", 1.0, "", 0.0, 2.0};
+  ControlGUI gui;
 
   Mesh spectrum{Mesh::LINE_STRIP};
   Mesh line{Mesh::LINES};
@@ -29,6 +27,13 @@ struct MyApp : App {
   float maximum{-std::numeric_limits<float>::max()};
 
   void onCreate() override {
+    gui << rate;
+    gui.init();
+    navControl().useMouse(false);
+
+    frequencyFilter.freq(25);
+    rateFilter.freq(25);
+
     gam::sampleRate(audioIO().framesPerSecond());
     player.load("../BBQ.wav");
 
@@ -42,6 +47,7 @@ struct MyApp : App {
 
   void onSound(AudioIOData& io) override {
     while (io()) {
+      player.rate(rateFilter(rate.get()));
       float f = player();
 
       if (stft(f)) {
@@ -69,20 +75,17 @@ struct MyApp : App {
         // if a hottest bin was found on this frame
         if (hottest > -1) {
           hz = audioIO().framesPerSecond() / 2.0f * hottest / N;
-          // set the frequency of the oscillator
-          osc.freq(hz);
         }
       }
 
-      io.out(0) = io.out(1) = osc();
+      osc.freq(frequencyFilter(hz));
+      io.out(0) = io.out(1) = osc() * 0.1;
     }
   }
 
-  void onAnimate(double dt) override {
-    //
-    //
-    //
-    // printf("%f\n", hz);
+  bool onKeyDown(const Keyboard& k) override {
+    minimum = std::numeric_limits<float>::max();
+    maximum = -std::numeric_limits<float>::max();
   }
 
   void onDraw(Graphics& g) override {
@@ -93,11 +96,11 @@ struct MyApp : App {
     g.color(1, 0, 0);
     g.translate(diy::map(hz, 0, audioIO().framesPerSecond() / 2, -1, 1), 0, 0);
     g.draw(line);
+    gui.draw(g);
   }
 };
 
 int main() {
   MyApp app;
-  //  app.configureAudio(44100, 512, 2, 2);
   app.start();
 }
