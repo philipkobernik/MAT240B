@@ -8,6 +8,9 @@ using namespace std;
 // - takes lines of floats
 // - gives lines of floats
 //
+// use it like this:
+//
+//   ./read.exe something.wav | ./reverse.exe | ./write.exe reversed.wav
 //
 //
 
