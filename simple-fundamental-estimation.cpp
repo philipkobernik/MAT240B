@@ -79,7 +79,8 @@ struct MyApp : App {
       }
 
       osc.freq(frequencyFilter(hz));
-      io.out(0) = io.out(1) = osc() * 0.1;
+      io.out(0) = f;
+      io.out(1) = osc() * 0.5;
     }
   }
 

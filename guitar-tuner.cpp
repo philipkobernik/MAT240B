@@ -30,6 +30,8 @@ float f0(float threshold, int N, const float* data, int size,
   std::vector<Peak> peak;
   for (int i = 1; i < size - 1; i++) {
     if (data[i] < (threshold + bottom[i])) continue;
+
+    // make sure it is a local maxima
     if (data[i] < data[i - 1]) continue;
     if (data[i] < data[i + 1]) continue;
     peak.push_back({data[i], i * sampleRate / (2 * size)});
